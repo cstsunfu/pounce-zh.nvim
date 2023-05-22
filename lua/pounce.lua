@@ -1,3 +1,4 @@
+-- vim: sw=2
 local matcher = require "pounce.matcher"
 local log = require "pounce.log"
 local vim = vim
@@ -9,7 +10,10 @@ local config = {
   accept_best_key = "<enter>",
   multi_window = true,
   debug = false,
+  use_pinyin = true,
 }
+
+local pinyin = {}
 
 local default_hl = {
   -- highlight default PounceMatch cterm=bold ctermfg=black ctermbg=green gui=bold fg=#555555 bg=#11dd11
@@ -138,6 +142,10 @@ end
 function M.setup(opts)
   M.config(opts)
 
+  if config.use_pinyin then
+    pinyin = vim.fn.json_decode(vim.fn.readfile('/home/sun/.local/share/nvim/site/pack/packer/opt/pounce.nvim/lua/pinyin.json'))
+  end
+
   local pounce_highlights = vim.api.nvim_create_augroup("pounce_highlights", {})
   vim.api.nvim_create_autocmd("ColorScheme", {
     group = pounce_highlights,
@@ -263,6 +271,18 @@ function M.pounce(opts, ns)
         local cursor_line, cursor_col = unpack(vim.api.nvim_win_get_cursor(win))
         for line = win_info.topline, win_info.botline do
           local text = vim.api.nvim_buf_get_lines(buf, line - 1, line, false)[1]
+          if opts.use_pinyin then
+            local text_tab = {}
+            for i=0, vim.fn.strchars(text) do
+              local char = vim.fn.strcharpart(text, i, 1)
+              if pinyin[char] ~= nil then
+                table.insert(text_tab, pinyin[char])
+              else
+                table.insert(text_tab, char)
+              end
+            end
+            text = table.concat(text_tab)
+          end
           local matches = matcher.match(input, text)
           for _, m in ipairs(matches) do
             local score = m.score
