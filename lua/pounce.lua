@@ -139,11 +139,17 @@ end
 M.config = function(opts)
   config = vim.tbl_extend("force", config, opts or {})
 end
+
+local script_path = function()
+  local str = debug.getinfo(1, "S").source:sub(2)
+  return str:match("(.*[/ \\])")
+end
+
 function M.setup(opts)
   M.config(opts)
 
   if config.use_pinyin then
-    pinyin = vim.fn.json_decode(vim.fn.readfile('/home/sun/.local/share/nvim/site/pack/packer/opt/pounce.nvim/lua/pinyin.json'))
+    pinyin = vim.fn.json_decode(vim.fn.readfile(script_path()..'pinyin.json'))
   end
 
   local pounce_highlights = vim.api.nvim_create_augroup("pounce_highlights", {})
