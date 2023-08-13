@@ -1,3 +1,13 @@
+# pounce-zh.nvim
+
+pounce-zh.nvim 是 pounce.nvim 的一个中文适配版本, 在查找中文字符时可以不必输入中文本身，而是输入拼音即可
+
+对于每个中文字符我们将其替换为最常见的读音的拼音的前3个字符(不足三个用空格替换)，如：
+```
+中 -> "zho"
+符 -> "fu "
+```
+# 
 # pounce.nvim
 
 Pounce is a motion plugin similar to [EasyMotion][1], [Sneak][2], [Hop][3], and
@@ -86,6 +96,7 @@ require'pounce'.setup{
   accept_best_key = "<enter>",
   multi_window = true,
   debug = false,
+  use_pinyin = true,
 }
 ```
 
