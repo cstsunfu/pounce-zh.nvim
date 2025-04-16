@@ -11,6 +11,7 @@ local config = {
   multi_window = true,
   debug = false,
   use_pinyin = true,
+  increase_cmd_height_if_zero = true,
 }
 
 local pinyin = {}
@@ -149,7 +150,7 @@ function M.setup(opts)
   M.config(opts)
 
   if config.use_pinyin then
-    pinyin = vim.fn.json_decode(vim.fn.readfile(script_path()..'pinyin.json'))
+    pinyin = vim.fn.json_decode(vim.fn.readfile(script_path() .. 'pinyin.json'))
   end
 
   local pounce_highlights = vim.api.nvim_create_augroup("pounce_highlights", {})
@@ -220,7 +221,7 @@ function M.pounce(opts, ns)
   local hl_prio = 65533
 
   local old_cmdheight = vim.o.cmdheight
-  if not opts.just_preview then
+  if not opts.just_preview and opts.increase_cmd_height_if_zero then
     if old_cmdheight == 0 then
       vim.o.cmdheight = 1
       vim.cmd "redraw"
@@ -279,7 +280,7 @@ function M.pounce(opts, ns)
           local text = vim.api.nvim_buf_get_lines(buf, line - 1, line, false)[1]
           if opts.use_pinyin then
             local text_tab = {}
-            for i=0, vim.fn.strchars(text) do
+            for i = 0, vim.fn.strchars(text) do
               local char = vim.fn.strcharpart(text, i, 1)
               if pinyin[char] ~= nil then
                 table.insert(text_tab, pinyin[char])
@@ -367,11 +368,11 @@ function M.pounce(opts, ns)
         break
       end
 
-      if nr == 27 then -- escape
+      if nr == 27 then                      -- escape
         break
       elseif nr == "\x80kb" or nr == 8 then -- backspace or <C-h>
         input = input:sub(1, -2)
-      elseif nr == 21 then -- <C-u>
+      elseif nr == 21 then                  -- <C-u>
         input = ""
       else
         local ch = vim.fn.nr2char(nr)
@@ -391,7 +392,6 @@ function M.pounce(opts, ns)
       last_input = input
     else
       vim.cmd "redraw!"
-      vim.notify "hi"
       return 1
     end
   end
